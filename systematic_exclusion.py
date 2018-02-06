@@ -116,16 +116,20 @@ def prepare_insert(table = None, columns = None):
     """
     pass table in as string.
     pass columns in as an array
+    Adjusting this to pass a cleared values...
     """
     pass;
     query_base = "INSERT INTO %s ( "%(table);
+    print(query_base)
     for a in columns:
+        print(a)
         b = "";
         if columns.index(a)>0: b+=", "
         b+=a;
         query_base+=b;
-    query_base+=") VALUES ( %s )"
-    return 
+    #query_base+=") VALUES ( %s )"
+    query_base+= ") VALUES ( "
+    return query_base; # wow... I forgot to return a value.
     
 def insert_new_record(connection, values,columns = None, table=None):
     """
@@ -142,14 +146,29 @@ def insert_new_record(connection, values,columns = None, table=None):
         raise ValueError(message);
     columns = columns or exclusion_columns;
     table = table or exclusion_table;
-    base = prepare_insert(table,columns);
     while len(values) < len(columns): 
         values.append("null")
     if len(values) > len(columns):
         values = values[:len(columns)]
-    base = base%(values)
+    base = prepare_insert(table,columns);
+    print(base)
+    # Adjust this to match the individual replacements.
+    for a in values:
+        try:
+            if values.index(a) < len(columns)-1: 
+                #base = base%(a+" %s")
+                base += "'%s', "%(a);
+            else: 
+                base += "'%s'"%(a);
+        except Exception as edna:
+            log("Can't add parameter(%s): %s"%(a,edna))
+            continue
+    base=base[:-1]+" )"
+    base.replace(", )"," )")
+    #base = base%(values)
     curs = connection.cursor()
     try:
+        print(base)
         curs.execute(base);
         connection.commit()
         log("Successfully wrote values!",log_path)
@@ -157,7 +176,7 @@ def insert_new_record(connection, values,columns = None, table=None):
         message = "unhandled exception occurred: %s"%(echo);
         log(message,log_path)
         log(message,error_path)
-        raise Exception(echo);
+        raise Exception(str(echo));
     
 # I'll set up an additional mechanism for handling the total number of hits.
 def check_for_record(connection, seek_value, columns = None, table = None):
