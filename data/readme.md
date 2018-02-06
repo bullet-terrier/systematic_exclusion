@@ -12,3 +12,47 @@ though this might prevent other initialization tasks from running.
 expand on the database maintenance
 expand on the database initialization - have the process check for the existence of the database and table before attempting to generate one. ALTERNATIVELY just attempt the "CREATE" and use the error 
 that the table exists as the feedback to not write the table. If that is the case  - attempt to use the existing columns instead of those defined in the configuration section.
+
+# samples
+
+>>> exclusion_columns = [
+...     "file_id",
+...     "file_name",
+...     "original_path",
+...     "file_hash"
+... ]
+>>> str(exclusion_columns)
+"['file_id', 'file_name', 'original_path', 'file_hash']"
+>>> import sqlite3
+>>> conn = sqlite3.connect("C:/Local_Code/repos/systematic_exclusion/data/systematic_exclusions.dbz")
+>>> curs = conn.cursor()
+>>> Statement = "INSERT INTO loaded_files(file_name, file_hash) VALUES(%s, %s)"
+>>> import hashlib
+>>> insers = ["alpha",'bravo','charlie','delta','echo','foxtrot','golf','hector','indigo','kilo','lima']
+>>> for a in insers:
+...     curs.execute(Statement%(a,hashlib.md5(bytes(a,'ascii')).hexdigest())
+...
+... )
+...
+Traceback (most recent call last):
+  File "<stdin>", line 2, in <module>
+sqlite3.OperationalError: unrecognized token: "2c1743a391305fbf367df8e4f069f9f9"
+>>> Statement = "INSERT INTO loaded_files(file_name, file_hash) VALUES('%s', '%s')"
+>>> for a in insers:
+...     curs.execute(Statement%(a,hashlib.md5(bytes(a,'ascii')).hexdigest())
+...
+... )
+...
+<sqlite3.Cursor object at 0x0000000005149570>
+<sqlite3.Cursor object at 0x0000000005149570>
+<sqlite3.Cursor object at 0x0000000005149570>
+<sqlite3.Cursor object at 0x0000000005149570>
+<sqlite3.Cursor object at 0x0000000005149570>
+<sqlite3.Cursor object at 0x0000000005149570>
+<sqlite3.Cursor object at 0x0000000005149570>
+<sqlite3.Cursor object at 0x0000000005149570>
+<sqlite3.Cursor object at 0x0000000005149570>
+<sqlite3.Cursor object at 0x0000000005149570>
+<sqlite3.Cursor object at 0x0000000005149570>
+>>> conn.commit()
+>>> # well, the database works well for storing information - I'll save this as an example.

@@ -30,7 +30,8 @@ class ich_will:
             log(message,"activity_log.log");
             log(message,"error_log.log");
             raise ValueError(message);
-        query_base = "CREATE TABLE %s ( %s_ID INT "%(table_name,table_name);
+        # going to try something here - 
+        query_base = "CREATE TABLE %s ( %s_ID INT AUTO INCREMENT "%(table_name,table_name);
         log("Generated query base: %s"%(query_base), "./activity_log.log");
         for a in columns:
             if type(a) == tuple:
