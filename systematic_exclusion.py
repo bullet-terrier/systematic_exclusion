@@ -4,6 +4,12 @@ systematic exclusion.py
 
 main mechanism to handle the exclusionary processes.
 
+So the good news is that this will work when integrated, with pathing relative
+to where the caller is, not this file.
+
+Down side - I'll need to do some more integration work - to make sure that this
+module is up to snuff.
+
 Note - to suppress logging, you'll need to adjust the log module.
      forcing an early return is a hacky but workable solution.
 """
@@ -55,7 +61,7 @@ if os.path.isfile(os.path.dirname(data_path)+os.sep+"runcounter"):
         log("Some unhandled exception occurred - see inner message: %s"%(EX),error_path);
 elif not os.path.exists(os.path.dirname(data_path)+os.sep+"runcounter"):
     pass
-    if not os.path.exists(os.path.dirname(data_path)): os.path.makedirs(os.path.dirname(data_path));
+    if not os.path.exists(os.path.dirname(data_path)): os.makedirs(os.path.dirname(data_path));
     run_init = True;
     log("Looks like the runcounter file doesn't exist at %s. Generating it now."%(os.path.dirname(data_path)+os.sep+"runcounter"),log_path);
     #s.popen("popen_test.py 'alpha', ['bravo', 'for' ,'days'] ");
@@ -72,6 +78,18 @@ else:
     raise Exception("Unknown exception has occurred - all cases should have been handled.")
     
 ### END INITIALIZATION ###
+
+###    OBJECTS DEFINED    ###
+
+class FoundError(BaseException):
+    """
+    basic exception to differentiate with default fatal exception.
+    use this when throwing an exception based on the results of 
+    the lookup.
+    """
+    pass
+ 
+###  END OBJECTS DEFINED  ###
  
 
 ###    ACCESSOR METHODS    ###
@@ -138,6 +156,8 @@ def insert_new_record(connection, values,columns = None, table=None):
     
     fair warning - it will assume that your insert statement will match the definition for columns
     in the configuration section.
+    
+    Still running into issues - if the last value in the list h
     """
     if type(values) != list: 
         message="Values must be a list of values (current: %s)"%(str(values))
@@ -155,7 +175,7 @@ def insert_new_record(connection, values,columns = None, table=None):
     # Adjust this to match the individual replacements.
     for a in values:
         try:
-            if values.index(a) < len(columns)-1: 
+            if values.index(a) < len(columns): 
                 #base = base%(a+" %s")
                 base += "'%s', "%(a);
             else: 
