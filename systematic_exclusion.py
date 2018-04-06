@@ -14,6 +14,7 @@ Note - to suppress logging, you'll need to adjust the log module.
      forcing an early return is a hacky but workable solution.
 """
 
+print("All hail the glow cloud");
 import sqlite3
 import os
 import sys; sys.path.append(os.curdir);sys.path.append('common');
@@ -23,6 +24,7 @@ from log_function import log_output as log;
 
 ###    CONFIGURATIONS    ###
 
+# replace these with attributes within a class.
 data_path = "./data/systematic_exclusions.dbz"
 log_path = "./activity_log.log"
 error_path = "./error_log.log"
@@ -33,15 +35,15 @@ exclusion_columns = [
     "original_path",
     "file_hash"
 ]
-hash_algorithm = ""; # I'll need to figure out how I want to determine the algorithm.
 
 ###  END CONFIGURATIONS  ###
 
 # RUN INITIALIZATION IF IT DOESN'T FIND THE RUNCOUNTER #
+# I"m going to set this up to run as a method in the class rather than in the entire module.
 run_init = False;
 if os.path.isfile(os.path.dirname(data_path)+os.sep+"runcounter"):
     pass
-    data = ""; # if int(data) is anything other than a 1, clear it out.
+    data = "";
     with open(os.path.dirname(data_path)+os.sep+"runcounter") as dt:
         data = dt.read();
         log("Updating data, checking %s, value: %s"%(os.path.dirname(data_path)+os.sep+"runcounter",data),log_path)
@@ -64,12 +66,7 @@ elif not os.path.exists(os.path.dirname(data_path)+os.sep+"runcounter"):
     if not os.path.exists(os.path.dirname(data_path)): os.makedirs(os.path.dirname(data_path));
     run_init = True;
     log("Looks like the runcounter file doesn't exist at %s. Generating it now."%(os.path.dirname(data_path)+os.sep+"runcounter"),log_path);
-    #s.popen("popen_test.py 'alpha', ['bravo', 'for' ,'days'] ");
-    # handy proof of concept - but not too much of value to this process.
-    #subprocess.call("python popen_test.py 'alpha', ['bravo','for','days']")
     log("Starting systematic_init: parameters: %s %s %s"%(exclusion_table,data_path,str(exclusion_columns)));
-    #subprocess.call("python systematic_init.py '%s', '%s','%s'"%(exclusion_table,data_path,str(exclusion_columns)))
-    #path,table,columns
     systematic_init.main(data_path,exclusion_table,exclusion_columns)
     log("Completed call - update should have applied.")
 else:
@@ -100,6 +97,7 @@ some object to manage the connection to the database file.
 Will also define a mechanism for calculating the next id.
 """
 
+# this needs to be replaced.
 def assign_new_id(connection,table):
     """
     must have the connection and table - 
@@ -118,7 +116,7 @@ def assign_new_id(connection,table):
     results = curs.execute(call);
     res = results.fetchall();
     try:
-        res = int(res); # should be ca
+        res = int(res);
         log("Identified %s as maximum ID..."%(res),log_path);
     except Exception as ECHO:
         log("EXCEPTION OCCURRED: %s "%(ECHO),error_path);
@@ -130,11 +128,13 @@ def assign_new_id(connection,table):
     log("New maximum ID = %s"%(res),log_path);
     return res;
 
+# merge prepare_insert with insert_new_record - they don't need to exist separately.
 def prepare_insert(table = None, columns = None):
     """
     pass table in as string.
     pass columns in as an array
     Adjusting this to pass a cleared values...
+    I'm going to merge
     """
     pass;
     query_base = "INSERT INTO %s ( "%(table);
@@ -148,7 +148,8 @@ def prepare_insert(table = None, columns = None):
     #query_base+=") VALUES ( %s )"
     query_base+= ") VALUES ( "
     return query_base; # wow... I forgot to return a value.
-    
+
+#  this needs to be fixed.    
 def insert_new_record(connection, values,columns = None, table=None):
     """
     I'll need to set up a method that handles the variable nature of my mechanisms. - some of them
@@ -159,11 +160,14 @@ def insert_new_record(connection, values,columns = None, table=None):
     
     Still running into issues - if the last value in the list h
     """
+    # initialize some vals.    
     if type(values) != list: 
         message="Values must be a list of values (current: %s)"%(str(values))
         log(message,log_path);
         log(message,error_path);
         raise ValueError(message);
+    query_base = "INSERT INTO ";
+    # these will need to be modified to exist within a class - exclusion columns etc...
     columns = columns or exclusion_columns;
     table = table or exclusion_table;
     while len(values) < len(columns): 
@@ -172,7 +176,6 @@ def insert_new_record(connection, values,columns = None, table=None):
         values = values[:len(columns)]
     base = prepare_insert(table,columns);
     print(base)
-    # Adjust this to match the individual replacements.
     for a in values:
         try:
             if values.index(a) < len(columns): 
